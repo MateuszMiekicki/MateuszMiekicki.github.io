@@ -1,0 +1,38 @@
+@font-face {
+    font-family: JetBrainsMono-Bold;
+    src: url(../resources/font/JetBrainsMono-Bold.woff2);
+  }
+@font-face {
+    font-family: JetBrainsMono-Regular;
+    src: url(../resources/font/JetBrainsMono-Regular.woff2);
+}
+
+@font-face {
+    font-family: JetBrainsMono-Medium;
+    src: url(../resources/font/JetBrainsMono-Mediumc.woff2);
+}
+
+@font-face {
+    font-family: JetBrainsMono-Medium-Italic;
+    src: url(../resources/font/JetBrainsMono-Medium-Italic.woff2);
+}
+
+@font-face {
+    font-family: JetBrainsMono-Italic;
+    src: url(../resources/font/JetBrainsMono-Italic.woff2);
+}
+
+@font-face {
+    font-family: JetBrainsMono-ExtraBold-Italic;
+    src: url(../resources/font/JetBrainsMono-ExtraBold-Italic.woff2);
+}
+
+@font-face {
+    font-family: JetBrainsMono-ExtraBold;
+    src: url(../resources/font/JetBrainsMono-ExtraBold.woff2);
+}
+
+@font-face {
+    font-family: JetBrainsMono-Bold-Italic;
+    src: url(../resources/font/JetBrainsMono-Bold-Italic.woff2);
+}

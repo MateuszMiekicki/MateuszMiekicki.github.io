@@ -1,42 +1,5 @@
-@font-face {
-    font-family: JetBrainsMono-Bold;
-    src: url(../resources/font/JetBrainsMono-Bold.woff2);
-  }
-@font-face {
-    font-family: JetBrainsMono-Regular;
-    src: url(../resources/font/JetBrainsMono-Regular.woff2);
-}
-
-@font-face {
-    font-family: JetBrainsMono-Medium;
-    src: url(../resources/font/JetBrainsMono-Mediumc.woff2);
-}
-
-@font-face {
-    font-family: JetBrainsMono-Medium-Italic;
-    src: url(../resources/font/JetBrainsMono-Medium-Italic.woff2);
-}
-
-@font-face {
-    font-family: JetBrainsMono-Italic;
-    src: url(../resources/font/JetBrainsMono-Italic.woff2);
-}
-
-@font-face {
-    font-family: JetBrainsMono-ExtraBold-Italic;
-    src: url(../resources/font/JetBrainsMono-ExtraBold-Italic.woff2);
-}
-
-@font-face {
-    font-family: JetBrainsMono-ExtraBold;
-    src: url(../resources/font/JetBrainsMono-ExtraBold.woff2);
-}
-
-@font-face {
-    font-family: JetBrainsMono-Bold-Italic;
-    src: url(../resources/font/JetBrainsMono-Bold-Italic.woff2);
-}
-
+@import url("font.css");
+@import url("article.css");
 
 body{
     background: #121111;
@@ -50,83 +13,12 @@ header{
     margin: 5rem 33% 0 33%;
 }
 a{
-    color: inherit; /* blue colors for links too */
-    text-decoration: inherit; /* no underline */
+    color: inherit; 
+    text-decoration: inherit;
 }
 
 main{
     margin: 2.5rem 33% 0 33%;
-}
-
-.article{
-    margin: 2.5rem 0 2.5rem 0;
-}
-
-.article .title{
-    font-size: 2rem;
-    font-family: JetBrainsMono-Bold;
-    padding: 0 0 1rem 0;
-}
-
-.article .introduction {
-    padding: 0 0 0.5rem 0;
-    font-size: 0.9rem;
-}
-
-.article .informationAobutArticle{
-    font-size: 0.6rem;
-    color: rgba(255,255,255, 0.5);
-}
-
-.article .informationAobutArticle .tip {
-    position: relative;
-    display: inline-block;
-    border-bottom: 1px dotted black;
-}
-  
-.article .informationAobutArticle .tip .tipText {
-    visibility: hidden;
-    width: 120px;
-    top: 100%;
-    left: 50%;
-    margin-left: -60px;
-    background-color: black;
-    color: #fff;
-    text-align: center;
-    border-radius: 6px;
-    padding: 5px 0;
-    position: absolute;
-    z-index: 1;
-}
-
-.article .informationAobutArticle .tip:hover .tipText {
-    visibility: visible;
-}
-
-.article .informationAobutArticle .date{
-    display: inline-block;
-    padding: 0 2rem 0 0;
-}
-
-.article .informationAobutArticle .writeBy{
-    display: inline-block;
-    padding: 0 2rem 0 0;
-}
-
-.article .informationAobutArticle .readTime{
-    display: inline-block;
-    padding: 0 2rem 0 0;
-}
-
-.article .informationAobutArticle .tag{
-    margin: 0;
-    padding: 0;
-    display: inline-block;
-    padding: 0 2rem 0 0;
-}
-
-.article .informationAobutArticle .tag li{
-    display: inline-block;
 }
 
 footer{

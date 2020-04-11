@@ -1,0 +1,70 @@
+.article{
+    margin: 2.5rem 0 2.5rem 0;
+}
+
+.article .title{
+    font-size: 2rem;
+    font-family: JetBrainsMono-Bold;
+    padding: 0 0 1rem 0;
+}
+
+.article .introduction {
+    padding: 0 0 0.5rem 0;
+    font-size: 0.9rem;
+}
+
+.article .informationAobutArticle{
+    font-size: 0.6rem;
+    color: rgba(255,255,255, 0.5);
+}
+
+.article .informationAobutArticle .tip {
+    position: relative;
+    display: inline-block;
+    border-bottom: 1px dotted black;
+}
+  
+.article .informationAobutArticle .tip .tipText {
+    visibility: hidden;
+    width: 120px;
+    top: 100%;
+    left: 50%;
+    margin-left: -60px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    position: absolute;
+    z-index: 1;
+}
+
+.article .informationAobutArticle .tip:hover .tipText {
+    visibility: visible;
+}
+
+.article .informationAobutArticle .date{
+    display: inline-block;
+    padding: 0 2rem 0 0;
+}
+
+.article .informationAobutArticle .writeBy{
+    display: inline-block;
+    padding: 0 2rem 0 0;
+}
+
+.article .informationAobutArticle .readTime{
+    display: inline-block;
+    padding: 0 2rem 0 0;
+}
+
+.article .informationAobutArticle .tag{
+    margin: 0;
+    padding: 0;
+    display: inline-block;
+    padding: 0 2rem 0 0;
+}
+
+.article .informationAobutArticle .tag li{
+    display: inline-block;
+}
