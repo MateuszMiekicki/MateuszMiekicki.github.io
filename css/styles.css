@@ -11,13 +11,6 @@ header {
     margin: 5rem 30% 0 30%;
 }
 
-header img {
-    width: 1.5rem;
-    height: 1.5rem;
-    margin: 1rem 1rem 0 0;
-    float:right;
-}
-
 a {
     color: inherit;
     text-decoration: inherit;
