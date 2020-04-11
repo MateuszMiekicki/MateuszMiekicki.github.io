@@ -1,0 +1,70 @@
+.articleHeader{
+    margin: 2.5rem 0 2.5rem 0;
+}
+
+.articleHeader .title{
+    font-size: 2rem;
+    font-family: JetBrainsMono-Bold;
+    padding: 0 0 1rem 0;
+}
+
+.articleHeader .introduction {
+    padding: 0 0 0.5rem 0;
+    font-size: 0.9rem;
+}
+
+.articleHeader .informationAobutarticleHeader{
+    font-size: 0.6rem;
+    color: rgba(255,255,255, 0.5);
+}
+
+.articleHeader .informationAobutarticleHeader .tip {
+    position: relative;
+    display: inline-block;
+    border-bottom: 1px dotted black;
+}
+  
+.articleHeader .informationAobutarticleHeader .tip .tipText {
+    visibility: hidden;
+    width: 120px;
+    top: 100%;
+    left: 50%;
+    margin-left: -60px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    position: absolute;
+    z-index: 1;
+}
+
+.articleHeader .informationAobutarticleHeader .tip:hover .tipText {
+    visibility: visible;
+}
+
+.articleHeader .informationAobutarticleHeader .date{
+    display: inline-block;
+    padding: 0 2rem 0 0;
+}
+
+.articleHeader .informationAobutarticleHeader .writeBy{
+    display: inline-block;
+    padding: 0 2rem 0 0;
+}
+
+.articleHeader .informationAobutarticleHeader .readTime{
+    display: inline-block;
+    padding: 0 2rem 0 0;
+}
+
+.articleHeader .informationAobutarticleHeader .tag{
+    margin: 0;
+    padding: 0;
+    display: inline-block;
+    padding: 0 2rem 0 0;
+}
+
+.articleHeader .informationAobutarticleHeader .tag li{
+    display: inline-block;
+}
