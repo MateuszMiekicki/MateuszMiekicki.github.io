@@ -1,7 +1,13 @@
 @import url("font.css");
 .article {
+    font-size: 0.8rem;
 }
-
+.article h1{
+    font-size: 1.5rem;
+}
 .article .pre {
     margin: 0 20% 0 20%;
+}
+.article p { 
+    text-indent: 1rem;
 }

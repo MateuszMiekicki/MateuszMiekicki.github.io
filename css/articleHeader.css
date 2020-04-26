@@ -3,14 +3,14 @@
 }
 
 .articleHeader .title{
-    font-size: 2rem;
+    font-size: 1.5rem;
     font-family: JetBrainsMono-Bold;
     padding: 0 0 1rem 0;
 }
 
 .articleHeader .introduction {
     padding: 0 0 0.5rem 0;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
 }
 
 .articleHeader .informationAobutarticleHeader{
