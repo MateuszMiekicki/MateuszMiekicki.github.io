@@ -1,0 +1,59 @@
+header .articleLanguage{
+    float: right;
+    font-size: 1rem; 
+}
+
+.articlePreview .informationAboutArticle{
+    font-size: 0.6rem;
+    color: rgba(255,255,255, 0.5);
+}
+
+.articlePreview .informationAboutArticle .tip {
+    position: relative;
+    display: inline-block;
+}
+
+.articlePreview .informationAboutArticle .tip .tipText {
+    visibility: hidden;
+    width: 120px;
+    top: 100%;
+    left: 50%;
+    margin-left: -60px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    position: absolute;
+    z-index: 1;
+}
+
+.articlePreview .informationAboutArticle .tip:hover .tipText {
+    visibility: visible;
+}
+
+.articlePreview .informationAboutArticle .publicationDate{
+    display: inline-block;
+    padding: 0 2rem 0 0;
+}
+
+.articlePreview .informationAboutArticle .writeBy{
+    display: inline-block;
+    padding: 0 2rem 0 0;
+}
+
+.articlePreview .informationAboutArticle .readTime{
+    display: inline-block;
+    padding: 0 2rem 0 0;
+}
+
+.articlePreview .informationAboutArticle .keyWords{
+    margin: 0;
+    padding: 0;
+    display: inline-block;
+    padding: 0 2rem 0 0;
+}
+
+.articlePreview .informationAboutArticle .keyWords li{
+    display: inline-block;
+}
