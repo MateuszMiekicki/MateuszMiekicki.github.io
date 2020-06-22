@@ -1,35 +1,47 @@
 @import url("font.css");
 body {
-    background: #121111;
-    color: white;
-    font-family: JetBrainsMono-Regular;
-    margin: 5% 25% 0 25%;
+  background: #121111;
+  color: white;
+  font-family: JetBrainsMono-Regular;
+  margin: 5% 25% 0 25%;
 }
 
 header {
-    font-family: JetBrainsMono-ExtraBold;
-    font-size: 2.75rem;
+  font-family: JetBrainsMono-ExtraBold;
+  font-size: 3rem;
+}
+
+header .articleLanguage {
+  float: right;
+  font-size: 1rem;
 }
 
 footer {
-    text-align: center;
-    margin-top: 5%;
+  text-align: center;
+  margin-top: 5%;
 }
 
 a {
-    color: inherit;
-    text-decoration: inherit;
+  color: inherit;
+  text-decoration: inherit;
 }
 
 p {
-    text-indent: 1rem;
+  text-indent: 1rem;
 }
 
 @media only screen and (max-width: 1500px) {
-    body {
-        background: #121111;
-        color: white;
-        font-family: JetBrainsMono-Regular;
-        margin: 5% 15% 0 15%;
-    }
+  body {
+    margin: 5% 15% 0 15%;
+  }
+}
+
+h1 {
+  font-size: 2.75rem;
+}
+h2 {
+  font-size: 2.25rem;
+}
+h3 {
+  font-size: 1.75rem;
 }
