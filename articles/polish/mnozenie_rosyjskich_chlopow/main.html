@@ -25,40 +25,213 @@
 
 <body>
     <header>
-        <a href="../../../index.html">NOTES</a>
-        <div class="articleLanguage">
-            <a href="indexPolish.html">Polski</a>
-        </div>
+        <a href="../../../index_pl.html">NOTES</a>
         <hr>
     </header>
     <main>
-        <h1>title</h1>
-        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent vel rhoncus leo. Phasellus est nunc,
-            tincidunt in molestie nec, ultricies porta arcu. Phasellus fringilla lorem in lacinia placerat. Nam placerat
-            augue velit, eget auctor ligula dapibus quis. Nulla ut tincidunt nulla. Duis ornare ullamcorper ligula,
-            dapibus cursus nibh finibus quis. Cras a elit nec nisl blandit sollicitudin ornare et diam. Suspendisse
-            mollis lorem vel bibendum tempor. Donec tincidunt mi neque, vitae imperdiet purus auctor id. Quisque non
-            eros eu magna iaculis auctor nec quis urna. Donec in dolor ut quam luctus imperdiet eu sit amet ipsum.
+        <h1>Mnożenie rosyjskich chłopów</h1>
+        <p>Do przedstawienia owego algorytmu wykorzystam C++.
+            Wymagana wiedza do zrozumienia niżej zawartych treści opiera się na podstawoej wiedzy z matematyki, oraz
+            zrozumienia dziłania operatorów bitowych.
         </p>
-        <h2>title 2</h2>
         <p>
-            Ut diam nulla, tincidunt eget tellus quis, suscipit interdum sem. Integer imperdiet dapibus leo, eget
-            vehicula augue auctor vitae. Nullam molestie ut lectus sed tristique. Duis erat augue, porttitor dictum
-            elementum id, varius et justo. Aenean non ligula malesuada, condimentum lacus facilisis, elementum justo.
-            Etiam rutrum tellus vitae efficitur congue. Sed dictum nisl massa. In eget magna magna. Curabitur et mollis
-            augue. Curabitur vel est neque.
+            Narzędzia jakich będę używał.
+            <ul>
+                <li>g++ 10.1.0</li>
+                <li>google benchmark 1.5.1</li>
+                <li>Microsoft Windows [Version 10.0.18363.900]</li>
+            </ul>
         </p>
-        <h2>
-            <div class="container">
-                <pre><code class="javascript">
-    $(document).ready(function() {
-        $('pre code').each(function(i, block) {
-        hljs.highlightBlock(block);
-        });
-    });
-                </code></pre>
-            </div>
-        </h2>
+        <h2>Teoria</h2>
+        <h3>Operatory bitowe</h3>
+        <p>
+        <ul>
+            <li><b>& koniunkcja</b> jest również operacją dwuargumentową. Wynikiem jest 1, jeśli oba
+                argumenty są równe 1. W pozostałych przypadkach wynikiem jest 0.</li>
+            <li><b>
+                    << przesunięcie bitowe w lewo</b> w wyniku tej operacji wszystkie bity zostały przesunięte o jedno
+                        miejsce w lewo. Równoważne z pomnożeniem przez 2.</li>
+            <li><b>>> przesunięcie bitowe w prawo</b> w wyniku tej operacji wszystkie bity zostały przesunięte o jedno
+                miejsce w prawo. Równoważne z podzieleniem przez 2.</li>
+        </ul>
+        </p>
+        <h3>Algorytm</h3>
+        <p>Sam algorytm jest trywialny w implementacji, polega na pięciu krokach.
+        <ol>
+            <li>Ustal zmienną odpowiedzialną za wynika na 0</li>
+            <li>Jeżeli drugi czynnik działania jest nieparzysty, to dodaj do zmiennej odpowiedzialnej za wynik
+                pierwszy czynnik.</li>
+            <li>Wykonaj dzielenie całkowite drugiego czynniku, a pierwszy pomnoż przez 2.</li>
+            <li>Jeżeli drugi czynnik jest większy od 0, to wróć do punktu drugiego.</li>
+            <li>Zwróć wynik.</li>
+        </ol>
+        </p>
+        <h2>Implementacja</h2>
+        <div class="container">
+            <pre><code class="cpp">unsigned russianPeasantMultiplication(unsigned a, unsigned b) 
+{
+    unsigned result{0};
+    while (b > 0) 
+    {
+        if (b & 1)
+        {
+            result += a;
+        }
+        a <<= 1;
+        b >>= 1;
+    }
+    return result;
+}</code></pre>
+        </div>
+        <h2>Test wydajnościowy</h2>
+        <div class="container">
+            <pre>
+                <code class="cpp">#include &lt;benchmark/benchmark.h&gt;
+#include &lt;ctime&gt;
+
+unsigned russianPeasantMultiplication(unsigned a, unsigned b)
+{
+    unsigned result{0};
+    while (b > 0)
+    {
+        if (b & 1)
+        {
+            result += a;
+        }
+        a <<= 1;
+        b >>= 1;
+    }
+    return result;
+}
+
+unsigned multiplication(const unsigned a, const unsigned b)
+{
+    return a * b;
+}
+
+static void bench_russianPeasantMultiplication(benchmark::State &state)
+{
+    srand(time(NULL));
+    for (auto _ : state)
+    {
+        russianPeasantMultiplication(rand() % 999999999999, rand() % 999999999999);
+    }
+}
+
+BENCHMARK(bench_russianPeasantMultiplication);
+
+static void bench_multiplication(benchmark::State &state)
+{
+    srand(time(NULL));
+    for (auto _ : state)
+    {
+        multiplication(rand() % 999999999999, rand() % 999999999999);
+    }
+}
+
+BENCHMARK(bench_multiplication);
+BENCHMARK_MAIN();</code></pre>
+        </div>
+        <p>Na początku małe sprostowanie.
+        <ul>
+            <li><b>Dlaczego rand, zamiast random? </b>Nie chciałem zbędnego narzutu jakim jest stowrzenie obiektu klasy
+                random. Rand kompletnie spełnia moje założenia.</li>
+            <li><b>Dlaczego liczby są za każdym razem inne? Czy jesteś świadomy, że testy nie są powtarzalne? </b>Tak,
+                dla kilkunastu prób jakie wykonałem różnica była minimalna, mogę nawet zalożyć, że różnica wynikała, że
+                obciążenie maszyny testowej było różne. </li>
+
+        </ul>
+        </p>
+        <h3>Wyniki</h3>
+        <style>
+            table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+
+            table td,
+            table th {
+                border: 1px dotted white;
+            }
+
+            table tr:first-child th {
+                border-top: 0;
+            }
+
+            table tr:last-child td {
+                border-bottom: 0;
+            }
+
+            table tr td:first-child,
+            table tr th:first-child {
+                border-left: 0;
+            }
+
+            table tr td:last-child,
+            table tr th:last-child {
+                border-right: 0;
+            }
+        </style>
+        <p>
+            g++ .\main.cpp -lshlwapi -lbenchmark -lpthread
+        <table>
+            <thead>
+                <tr>
+                    <th>Benchmark</th>
+                    <th>Time</th>
+                    <th>CPU</th>
+                    <th>Iterations</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>bench_russianPeasantMultiplication</td>
+                    <td>135 ns</td>
+                    <td>132 ns</td>
+                    <td>4977778</td>
+                </tr>
+                <tr>
+                    <td>bench_multiplication</td>
+                    <td>43.3 ns</td>
+                    <td>43.0 ns</td>
+                    <td>16000000</td>
+                </tr>
+            </tbody>
+        </table>
+        </p>
+        <p>
+            g++ .\main.cpp -lshlwapi -lbenchmark -lpthread -O3
+        <table>
+            <thead>
+                <tr>
+                    <th>Benchmark</th>
+                    <th>Time</th>
+                    <th>CPU</th>
+                    <th>Iterations</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>bench_russianPeasantMultiplication</td>
+                    <td>32.8 ns </td>
+                    <td>33.0 ns</td>
+                    <td>20363636</td>
+                </tr>
+                <tr>
+                    <td>bench_multiplication</td>
+                    <td>33.6 ns</td>
+                    <td>33.9 ns</td>
+                    <td>19478261</td>
+                </tr>
+            </tbody>
+        </table>
+        </p>
+        <h2>Podsumowanie</h2>
+        <p>
+            Wyniki są podobne dzięki optymalizacji kompilatora. Różnica bez włączonej optymalizacji polega na tym, że procesory x86 jak i inne konstrukcje, posiadają odpowiedni rejestr do działań matematycznych.
+            Owy rejestr nazywa się MUL <a href="https://pl.wikibooks.org/wiki/Asembler_x86/Instrukcje/Arytmetyczne#mul">https://pl.wikibooks.org/wiki/Asembler_x86/Instrukcje/Arytmetyczne#mul</a>. 
+            Sama złożoność algorytmu szacuje się na złożoność logarytmiczną uzależnioną od wyboru czynnika. 
+        </p>
     </main>
     <footer>
         <a href="https://github.com/MateuszMiekicki">GitHub</a> |
