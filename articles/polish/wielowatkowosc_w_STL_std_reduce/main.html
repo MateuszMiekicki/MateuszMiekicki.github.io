@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="pl">
+
+<head>
+    <meta charset="utf-8">
+    <title>Notes</title>
+    <meta name="description" content="My notes">
+    <meta name="author" content="Mateusz Miekicki">
+
+    <link rel="stylesheet" href="../../../css/main.css?v=1.0">
+    <link rel="stylesheet" href="../../../css/article.css?v=1.0">
+    <!-- highlight.js -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/railscasts.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js"></script>
+    <!-- End highlight.js -->
+    <link rel="apple-touch-icon" sizes="180x180" href="../../../resources/favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../../../resources/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../../../resources/favicon/favicon-16x16.png">
+    <link rel="manifest" href="../../../resources/favicon/site.webmanifest">
+</head>
+
+<body>
+    <header>
+        <a href="../../../index_pl.html">NOTES</a>
+        <hr>
+    </header>
+    <main>
+        <h1>Wielowątkowość w STL - std::reduce</h1>
+        <p>Postaram się przedstawić w klarowny sposób wykrzystania gotowych rozwiązań opartych na wielowątkowośći
+            dostępnych w bibliotece standardowej.
+        </p>
+        <p>
+            Narzędzia jakich będę używał.
+        <ul>
+            <li>g++ 10.1.0</li>
+            <li>google benchmark 1.5.1</li>
+            <li>Microsoft Windows [Version 10.0.18363.900]</li>
+        </ul>
+        </p>
+        <h2>Teoria</h2>
+        <ul>
+            <li><b>Czym jest współbieżność?</b> Współbieżność polega na jednoczesnym wykonywaniu co najmniej dwóch
+                czynności - trywializując. Najprostszym przykładem jest jednoczesne chodzenie i rozmawianie przez
+                telefon.</li>
+            <li><b>Dlaczego warto stosować współbieżność?</b> Opierając się na moim bądź co bądź nie długim
+                doświadczeniu w pisaniu aplikacji wielowątkowych, mogę zauważyć dwa powody. Pierwszy, na pewno jest
+                oczywisty dla większości, skok wydajności. Drugi, nieco bardziej "ukryty" wiążący się z czystym kodem.
+                Podział i delegacja zadań. Mając jasno określoną architekturę, oraz wymagania możemy podzielić kod na
+                wyspecjalizowane segmenty - analogicznie do artykułów w gazecie. Na jeden artykuł przypada jedna nowina.
+            </li>
+            <li><b>Kiedy nie należy stosować współbieżności?</b> W mojej opinii ważniejsze jest wiedzieć, kiedy nie
+                stosować omawianej techniki. W największym skrócie współbieżności nie należy stosować w sytuacji, gdy
+                korzyści wynikające z tej formy przetwarzania nie są warte kosztów powodowanych przez to rozwiązanie.
+                Kod zawierający elementy przetwarzania współbieżnego jest w większości przypadków trudniejszy do
+                zrozumienia i interpretacji, zatem z pisaniem i konserwacją kodu wielowątkowego wiążą się bezpośrednie
+                koszty intelektualne. Co więcej, dodatkowa złożoność może też przekładać się na większą liczbę błędów.
+            </li>
+        </ul>
+        <p>
+        <ul>
+            <b style="font-size: 1rem;">Przyjaźniejsza forma "dokumentacji":</b>
+            <li><b>Wątki. </b><a
+                    href="https://en.cppreference.com/w/cpp/thread">https://en.cppreference.com/w/cpp/thread</a></li>
+            <li><b>Podstawowe algorytmy. </b><a
+                    href="https://en.cppreference.com/w/cpp/algorithm">https://en.cppreference.com/w/cpp/algorithm</a>
+            </li>
+            <li><b>Wyrażenia lambda. </b><a
+                    href="https://en.cppreference.com/w/cpp/language/lambda">https://en.cppreference.com/w/cpp/language/lambda</a>
+            </li>
+            <li><b>Polityka wykonania. </b><a
+                    href="https://en.cppreference.com/w/cpp/algorithm/execution_policy_tag_t">https://en.cppreference.com/w/cpp/algorithm/execution_policy_tag_t</a>
+            </li>
+            <b style="font-size: 1rem;">Dokumentacja:</b>
+            <li><b>Polityka wykonania. </b><a
+                    href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/n4849.pdf#page=721">http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/n4849.pdf#page=721</a>
+            </li>
+        </ul>
+        <ul>
+            <b style="font-size: 1rem;">Polityka wykonywania - "polityki":</b>
+            <li><b>sequenced_policy</b> Algorytm zostanie wykonany w postaci sekwencyjnej, podobnie jak w przypadku
+                wywołania bez polityki wykonywania. Globalnie dostępny egzemplarz ma nazwę std::execution::seq.</li>
+            <li><b>parallel_policy</b> Algorytm może być uruchomiony przez wiele wątków wspólnie
+                wykonujących zadanie w sposób równoległy. Globalnie dostępny
+                egzemplarz ma nazwę std::execution::par</li>
+            <li><b>parallel_unsequenced_policy</b> Algorytm może być uruchomiony przez wiele wątków wspólnie
+                wykonujących zadanie w sposób równoległy. Ponadto istnieje możliwość
+                wektoryzacji<sub>1</sub> kodu. W takim przypadku dostęp do kontenera może się
+                odbywać na przemian między wątkami, a także w ramach tego samego
+                wątku ze względu na wektoryzację. Globalnie dostępny egzemplarz ma
+                nazwę std::execution::par_unseq
+                <br><br>
+                <span style="font-size: 0.8rem;"><sub>1</sub><b>Wektoryzacja</b> to funkcja, która wymaga obsługi ze
+                    strony zarówno
+                    procesora, jak i kompilatora. Spójrz na prosty przykład pokrótce wyjaśniający wektoryzację i sposób
+                    jej działania.</style>
+            </li>
+        </ul>
+        </p>
+        <p>
+        </p>
+        <h2>Przykład</h2>
+        <h3>std::reduce</h3>
+        <p>Na wstępnie wyjąśnie czym jest std::reduce, oraz jego składnie. Jako, że jest stosunkowo nową rzeczą w
+            standardzie, ponieważ został dodany w 2017 roku. Ogólna składnia owej funkcji jest dostępna w
+            wielu wariantach <a
+                href="https://en.cppreference.com/w/cpp/algorithm/reduce">https://en.cppreference.com/w/cpp/algorithm/reduce</a>,
+            obecnie interesuje mnie opcja, która
+            przyjmuje politykę wykonywania, dwa iteratory, oraz wyrażenie inicjalizujące. </p>
+        <div class="container">
+            <pre><code class="cpp">//executionpolicy.hpp
+#include &lt;algorithm&gt;
+#include &lt;execution&gt;
+#include &lt;numeric&gt;
+#include &lt;execution&gt;
+
+auto accumulate(const std::vector<long double> &vec)
+{
+    return std::accumulate(vec.cbegin(), vec.cend(), 0.0);
+}
+
+auto reduce(const std::vector<long double> &vec)
+{
+    return std::reduce(vec.begin(), vec.end(), 0.0);
+}
+
+auto reduce_parallel_unsequenced_policy(const std::vector<long double> &vec)
+{
+    return std::reduce(std::execution::par_unseq, vec.begin(), vec.end(), 0.0);
+}
+
+auto reduce_parallel_policy(const std::vector<long double> &vec)
+{
+    return std::reduce(std::execution::par, vec.begin(), vec.end(), 0.0);
+}
+
+auto reduce_sequenced_policy(const std::vector<long double> &vec)
+{
+    return std::reduce(std::execution::seq, vec.begin(), vec.end(), 0.0);
+}</code></pre>
+            <pre><code class="cpp">//bench.cpp
+//g++ .\bench.cpp .\executionpolicy.hpp -std=c++17 -Wpedantic -Wall -Wextra -lshlwapi -lbenchmark -lpthread -o benchmark.exe
+#include &lt;vector&gt;
+#include &lt;random&gt;
+#include "benchmark/benchmark.h"
+#include "executionpolicy.hpp"
+
+auto vec = std::vector<long double>(1'000, 0.5);
+
+static void BM_accumulate(benchmark::State &state)
+{
+    for (auto _ : state)
+    {
+        accumulate(vec);
+    }
+}
+BENCHMARK(BM_accumulate);
+
+static void BM_reduce(benchmark::State &state)
+{
+    for (auto _ : state)
+    {
+        reduce(vec);
+    }
+}
+BENCHMARK(BM_reduce);
+
+static void BM_parallel_unsequenced_policy(benchmark::State &state)
+{
+    for (auto _ : state)
+    {
+        reduce_parallel_unsequenced_policy(vec);
+    }
+}
+BENCHMARK(BM_parallel_unsequenced_policy);
+
+static void BM_parallel_policy(benchmark::State &state)
+{
+    for (auto _ : state)
+    {
+        reduce_parallel_policy(vec);
+    }
+}
+BENCHMARK(BM_parallel_policy);
+
+static void BM_sequenced_policy(benchmark::State &state)
+{
+    for (auto _ : state)
+    {
+        reduce_sequenced_policy(vec);
+    }
+}
+BENCHMARK(BM_sequenced_policy);
+BENCHMARK_MAIN();</code></pre>
+        </div>
+        <style>
+            table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+
+            table td,
+            table th {
+                border: 1px dotted white;
+            }
+
+            table tr:first-child th {
+                border-top: 0;
+            }
+
+            table tr:last-child td {
+                border-bottom: 0;
+            }
+
+            table tr td:first-child,
+            table tr th:first-child {
+                border-left: 0;
+            }
+
+            table tr td:last-child,
+            table tr th:last-child {
+                border-right: 0;
+            }
+        </style>
+        Run on:<br>
+        (12 X 2592 MHz CPU s)<br>
+        CPU Caches:<br>
+        L1 Data 32K (x6)<br>
+        L1 Instruction 32K (x6)<br>
+        L2 Unified 262K (x6)<br>
+        L3 Unified 12582K (x1)<br>
+        <table>
+            <thead>
+                <tr>
+                    <th>Benchmark</th>
+                    <th>Time</th>
+                    <th>CPU</th>
+                    <th>Iterations</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>BM_accumulate</td>
+                    <td>7578 ns</td>
+                    <td>7673 ns</td>
+                    <td>89600</td>
+                </tr>
+                <tr>
+                    <td>BM_reduce</td>
+                    <td>9001 ns</td>
+                    <td>8998 ns</td>
+                    <td>74667</td>
+                </tr>
+                <tr>
+                    <td>BM_parallel_unsequenced_policy</td>
+                    <td>7599 ns</td>
+                    <td>7499 ns</td>
+                    <td>89600</td>
+                </tr>
+                <tr>
+                    <td>BM_parallel_policy</td>
+                    <td>12771 ns</td>
+                    <td>12870 ns</td>
+                    <td>49778</td>
+                </tr>
+                <tr>
+                    <td>BM_sequenced_policy</td>
+                    <td>13000 ns</td>
+                    <td>13114 ns</td>
+                    <td>56000</td>
+                </tr>
+            </tbody>
+        </table>
+        <p>
+            Do testów dodałem analogiczną funkcję z standardu 98, nie będę się wgłębiał w różnice jakie dzielą owe
+            funkcje. Na potrzeby tego wpisu ujmę to tak, że std::reduce pozwala zrównoleglić proces, a std::accumulate
+            nie. Ważnym spostrzeżeniem jest, że ze względu na wielowątkową naturę std::reduce nie możemy wykonywać za
+            pomocą tej funkcji wszystkich operacji, co wywodzi się z arytmetyki. Jako, że dodawanie jest przemienne, to
+            kolejność nie ma znaczenia, za to przy odejmowaniu wpadlibyśmy w pułapkę.<br>
+            <a
+                href="https://blog.tartanllama.xyz/accumulate-vs-reduce/">https://blog.tartanllama.xyz/accumulate-vs-reduce/</a>
+        </p>
+        <h3>Omówienie wyników</h3>
+        <p>Wszystko co zawrę w omówieniu, będzie oparte na wyżej wymienionym kodzie, ustawieniach kompilacji, oraz mocy
+            obliczeniowej mojej jednostki.</p>
+        <p>Jak widzimy różnice są znikome dla std::accumulate, oraz dla std::reduce w wersji wektoryzowanej.
+            Prawie dwu krotnie gorszy czas uzyskany przy standardowej wielowątkowośći wynika z narzutu jaki musi wykonań
+            system by podzielić dane, przypisać odpowiednią ilość zasobów, oraz utowrzyć wątki.
+            Proces dzielenia porcesu na wątki jest mimowszystko zasobożerny, co jak już wcześniej pisałem, warto
+            wiedzieć.
+        <ul>
+            <li><b>BM_accumulate</b> Wynik jest raczej standardowy, nie można oczekwiąć niczego innego. Prawodopodna
+                implementacja opiera się na pętli, która iteruje od pierwszego iteroatora do drugiego.</li>
+            <li><b>BM_reduce</b> Zasada działania jest analogiczna do std::accumulate, tylko, że std::reduce operuje na
+                "cięższych" typach, stąd ta różnica (o ile dobrze zrozumiałem zamysł z dokumentajci).</li>
+            <li><b>BM_parallel_unsequenced_policy</b> Znacząca różnica, która wynika z wektoryzacji jest trywialna do
+                wytłumaczenia.
+                <pre><code class="cpp">//kod wykonywany sekwencyjnie
+int sum {0};
+for (size_t i {0}; i &lt; v.size(); ++i) 
+{
+    sum += v[i];
+}
+//kod wykonany przy pomocy wektoryzacji, przy założeniu, że wktora posiada 4*N elementów
+int sum {0};
+for (size_t i {0}; i &lt; v.size() / 4; i += 4) 
+{
+sum += v[i] + v[i+1] + v[i + 2] + v[i + 3];
+}</code></pre>
+                Wiele procesorów posiada wbudowane instrukcje przeprowadzające w zaledwie jednym kroku operacje
+                matematyczne
+                takie jak sum += v[i] + v[i+1]
+                + v[i + 2] + v[i + 3];. Celem jest przekazanie maksymalnej liczby operacji matematycznych
+                w postaci jak najmniejszej liczby instrukcji.
+            </li>
+            <li><b>sequenced_policy</b> W tym wypadku sumują się wszystkie najgorsze cechy owej funkcji, dodatkowo jest
+                "zmuszona" wykonanać sie sekwencyjnie.</li>
+        </ul>
+        </p>
+        Kod użyty w wpisie:
+        <a href="code/code.7z">
+            Kod w formacie zip.
+        </a>
+    </main>
+    <footer>
+        <a href="https://github.com/MateuszMiekicki">GitHub</a> |
+        <a href="https://pl.linkedin.com/in/miekicki">Linkedin</a> | &#169; 2020
+    </footer>
+    <!-- Init highlight.js -->
+    <script>hljs.initHighlightingOnLoad();</script>
+    <!-- End Init highlight.js -->
+    <!-- highlightjs-line-numbers.js -->
+    <script>hljs.initLineNumbersOnLoad();</script>
+    <!-- End highlightjs-line-numbers.js -->
+    <!-- Google Analytics -->
+    <script>
+        window.ga = window.ga || function () { (ga.q = ga.q || []).push(arguments) }; ga.l = +new Date;
+        ga('create', 'UA-163892710-1', 'auto');
+        ga('send', 'pageview');
+    </script>
+    <script async src='https://www.google-analytics.com/analytics.js'></script>
+    <!-- End Google Analytics -->
+</body>
+
+</html>
