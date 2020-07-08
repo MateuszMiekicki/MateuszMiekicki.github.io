@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Notes</title>
+    <meta name="description" content="My notes">
+    <meta name="author" content="Mateusz Miekicki">
+
+    <link rel="stylesheet" href="../../../css/main.css?v=1.0">
+    <link rel="stylesheet" href="../../../css/article.css?v=1.0">
+    <!-- highlight.js -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/railscasts.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js"></script>
+    <!-- End highlight.js -->
+    <!-- highlightjs-line-numbers.js -->
+    <script
+        src="//cdnjs.cloudflare.com/ajax/libs/highlightjs-line-numbers.js/2.7.0/highlightjs-line-numbers.min.js"></script>
+    <!--End highlightjs-line-numbers.js -->
+    <link rel="apple-touch-icon" sizes="180x180" href="../../../resources/favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../../../resources/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../../../resources/favicon/favicon-16x16.png">
+    <link rel="manifest" href="../../../resources/favicon/site.webmanifest">
+</head>
+
+<body>
+    <header>
+        <a href="../../../index.html">NOTES</a>
+        <div class="articleLanguage">
+            <a href="indexPolish.html">Polski</a>
+        </div>
+        <hr>
+    </header>
+    <main>
+        <h1>Synchronization of simultaneous use std::cout</h1>
+        <p>In this entry I will show you how to use std::cout on many threads. The code will be protected against
+            typical problems when projecting multithreaded code. If multiple threads attempt to access the cout
+            simultaneously, the data generated in the shell
+            the output will be interestingly distorted.</p>
+
+
+        <div class="container">
+            <pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;thread&gt;
+#include &lt;mutex&gt;
+#include &lt;sstream&gt;
+#include &lt;vector&gt;
+
+struct safeThreadCout : public std::stringstream
+{
+    static inline std::mutex cout_mutex;
+    ~safeThreadCout()
+    {
+        std::lock_guard&lt;std::mutex&gt; l{cout_mutex};
+        std::cout &lt;&lt; rdbuf();
+        std::cout.flush();
+    }
+};
+static void print_cout(int id)
+{
+    std::cout &lt;&lt; "Cout o numerze " &lt;&lt; id &lt;&lt; '\n';
+}
+static void print_safeThreadCout(int id)
+{
+    safeThreadCout{} &lt;&lt; "safeThreadCout o numerze " &lt;&lt; id &lt;&lt; '\n';
+}
+int main()
+{
+    std::vector&lt;std::thread&gt; threads;
+    for (size_t i{0}; i &lt; 10; ++i)
+    {
+        threads.emplace_back(print_cout, i);
+    }
+    for (auto &thread : threads)
+    {
+        thread.join();
+    }
+    std::cout &lt;&lt; "=====================\n";
+    threads.clear();
+    for (size_t i{0}; i &lt; 10; ++i)
+    {
+        threads.emplace_back(print_safeThreadCout, i);
+    }
+    for (auto &thread : threads)
+    {
+        thread.join();
+    }
+}</code></pre>
+        </div>
+        <h2>Discussing the code.</h2>
+        <p>
+            My choice fell on stringstream to use the operator freely &lt;&lt;. When calling the destructor, a lock is
+            applied
+            and the buffer is passed on for display.Then we create two functions to display the given message, and a
+            number which is intended to be the call number. I won't discuss them in more detail, as they are very
+            trivial. We create a vector with 10 threads, which will call the function we implemented above. With this,
+            we can go to tests. </p>
+        <h2>Result</h2>
+        <p>
+            A short talk about how the output works when using our implementation.
+            We create a stringstream object, then we apply a blockade to a globally available mutex. At this point, we
+            get access to the content of the stream, the ability to output and free it. std::flush is used to get
+            instant access to buffer content.<br>
+            <img style="  display: block;
+            margin-left: auto;
+            margin-right: auto;
+            width: 50%;" src="result.png" alt="Result image">
+        </p>
+        <br>
+        Code use in this entry:
+        <a href="main.cpp">
+            Code.
+        </a>
+    </main>
+    <footer>
+        <a href="https://github.com/MateuszMiekicki">GitHub</a> |
+        <a href="https://pl.linkedin.com/in/miekicki">Linkedin</a> | &#169; 2020
+    </footer>
+    <!-- Init highlight.js -->
+    <script>hljs.initHighlightingOnLoad();</script>
+    <!-- End Init highlight.js -->
+    <!-- highlightjs-line-numbers.js -->
+    <script>hljs.initLineNumbersOnLoad();</script>
+    <!-- End highlightjs-line-numbers.js -->
+    <!-- Google Analytics -->
+    <script>
+        window.ga = window.ga || function () { (ga.q = ga.q || []).push(arguments) }; ga.l = +new Date;
+        ga('create', 'UA-163892710-1', 'auto');
+        ga('send', 'pageview');
+    </script>
+    <script async src='https://www.google-analytics.com/analytics.js'></script>
+    <!-- End Google Analytics -->
+</body>
+
+</html>
